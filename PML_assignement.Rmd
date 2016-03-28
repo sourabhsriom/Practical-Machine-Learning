@@ -1,0 +1,61 @@
+---
+title: "Practical Machine Learning Assignment : Exercise grades classification"
+author: "Sourabh Sriom"
+date: "March 27, 2016"
+output: html_document
+---
+
+Introduction
+-------------
+
+The goal of this project is to use data accumulated through various fitness tracking devices *e.g. Jawbone Up, Nike FuelBand etc* and determine the nature of the exercise done by the subject. Historically the discussion has centered around how much exercise is done by an individual, we now try to classify the exercise by its quality. The aim would be to measure the effectiveness of an exercise done by a person.
+
+The data for this project comes from *http://groupware.les.inf.puc-rio.br/har*. We will begin by review the data to see what are the variables that are available to us and analyse them for further use.
+
+Exploratory Data Analysis and Pre-Processing
+---------------------------
+```{r comment=NA, warning=FALSE, message=FALSE}
+
+setwd("~/Documents/R_Programming/Practical Machine Learning")
+data = read.csv("pml-training.csv", na.strings = c("", "NA"))
+```
+
+After the data is read, we summarize the data(for purposes of keeping this report to the required limit, I will not include the actual summary due to the large number of variables).
+
+The summary of the data tells us that there are a total of 160 variables in the dataset including the last variable *'classe'* which needs to be predicted. Our observation is there are multiple variables that have *NA* values in a lot of the rows. We have decided that any variable which has more than 50% of its values as NA will not be part of our prediction model. Furthermore, the first 7 variables like *serial no., name, timestamp etc* would not affect the type of exercise in anyway. Hence it is best to exclude those variables from the data. This pre-processing is done by a function called *exercise.R* which we will be sourcing for this project report.
+
+```{r comment=NA, warning=FALSE, message=FALSE}
+source('./exercise.R')
+newEx = exercise()
+dim(newEx)
+```
+The new exercise data now consists of 19622 observations each consisting of 53 variables. The next step would be to use the *caret* package to develop of model which can be trained on the data. This would also include separating the give dataset into a training and testing dataset for us to evaluate the accuracy of the model.
+
+```{r comment=NA, warning = FALSE, message=FALSE}
+library(caret)
+inTrain = createDataPartition(newEx$classe, p = 0.7, list = F)
+training = newEx[inTrain,]
+testing = newEx[-inTrain,]
+modRF = train(classe ~ . , data = training, method = "rf")
+modRF$finalModel
+
+```
+
+The model generation has been commented out to conserve the time taken to train this model is huge and that should not deviate us from the subject of this report.
+
+Let us now plot how the error rate of this model decreases as we increase the number of trees used in our model.
+
+```{r comment=NA, warning=FALSE}
+plot(modRF$finalModel, main  = "Error rate variation")
+```
+
+Testing the model
+------------------
+We can now apply of our model to our testing dataset to see what the predictions and their accuracy is.
+
+```{r warning=FALSE, comment=NA}
+testPreds = predict(modRF,newdata = testing)
+confusionMatrix(testPreds,testing$classe)
+```
+
+Thus we observe that our prediction model has over 99% accuracy, which is very high! This was the model finally used in the prediction of the test cases in the prediction quiz. All 20 predictions made by this model were correct.
