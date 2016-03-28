@@ -58,4 +58,6 @@ testPreds = predict(modRF,newdata = testing)
 confusionMatrix(testPreds,testing$classe)
 ```
 
-Thus we observe that our prediction model has over 99% accuracy, which is very high! This was the model finally used in the prediction of the test cases in the prediction quiz. All 20 predictions made by this model were correct.
+Accuracy and Out of Sample Error
+---------------------------------
+Thus we observe that our prediction model has over 99.2% accuracy, which is very high! This also means that the out of sample error is just 0.8%. This was the model finally used in the prediction of the test cases in the prediction quiz. All 20 predictions made by this model were correct.
